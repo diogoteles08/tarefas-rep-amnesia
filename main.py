@@ -1,6 +1,7 @@
 from enum import Enum
 import pandas as pd
 
+
 class Tarefa(Enum):
     COCO = ('Cocô', 1)
     PANOS = ('Panos', 1)
@@ -20,6 +21,26 @@ class Fila:
         if len(self.valor) > 1:
             self.valor = self.valor[1:] + self.valor[0]
 
+    def __iter__(self):
+        return iter(self.valor)
+
+    def __getitem__(self, index):
+        return self.valor[index]
+
+
+class FilaMoradores(Fila):
+    def __init__(self, valor_inicial=None):
+        super().__init__(valor_inicial)
+
+    def pega_proximo_morador_a_pegar_tarefa(self):
+        """
+        Seleciona o morador na primeira posição da fila, coloca no final da fila, e retorna o morador.
+        :return: Morador
+        """
+        morador = self.valor.pop(0)
+        self.valor.append(morador)
+        return morador
+
 
 class FilaIndividual(Fila):
     def __init__(self, valor_inicial=None):
@@ -27,11 +48,40 @@ class FilaIndividual(Fila):
             valor_inicial = list(Tarefa)
         super().__init__(valor_inicial)
 
+    def pega_primeira_da_lista_e_poe_no_fim_da_fila(self, lista):
+        for i in range(len(Tarefa)):
+            if self.valor[i] in lista:
+                indice_tarefa_escolhida = i
+                tarefa_escolhida = self.valor[i]
+                break
+        self.valor.pop(indice_tarefa_escolhida)
+        self.valor.append(tarefa_escolhida)
+        return tarefa_escolhida
+
 
 class Morador:
     def __init__(self, nome, fila_tarefas=None):
         self.nome = nome
         self.fila_ind = FilaIndividual(fila_tarefas)
+
+    def __str__(self):
+        return self.nome
+
+
+class TabelaTarefas:
+    def __init__(self):
+        self.tabela = {tarefa: [] for tarefa in Tarefa}
+
+    def pega_tarefas_faltantes(self):
+        return [tarefa for tarefa in self.tabela if len(self.tabela[tarefa]) < tarefa.value[1]]
+
+    def atribuir_tarefa(self, tarefa: Tarefa, morador: Morador):
+        self.tabela[tarefa].append(morador)
+
+    def mostra_tabela(self):
+        for tarefa, moradores in self.tabela.items():
+            print(f"{tarefa.value[0]}: {','.join(map(str, moradores))}")
+
 
 def extrai_filas_do_csv():
     info_filas = pd.read_csv('filas.csv')
@@ -43,14 +93,39 @@ def extrai_filas_do_csv():
             [Tarefa[nome_tarefa] for nome_tarefa in dados_morador[1:]]
         )
         fila_geral.append(morador)
-    return fila_geral
+    return FilaMoradores(fila_geral)
+
+
+def salva_filas_no_csv(fila_geral: FilaMoradores):
+    """
+    Referência: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_csv.html
+    """
+    df = pd.DataFrame({'Nome': [morador.nome for morador in fila_geral],
+                       'Tarefa1': [morador.fila_ind[0].name for morador in fila_geral],
+                       'Tarefa2': [morador.fila_ind[1].name for morador in fila_geral],
+                       'Tarefa3': [morador.fila_ind[2].name for morador in fila_geral],
+                       'Tarefa4': [morador.fila_ind[3].name for morador in fila_geral]})
+    df.to_csv('filas.csv', index=False)
+
 
 def gera_tarefas():
     # Use a breakpoint in the code line below to debug your script.
     fila_geral = extrai_filas_do_csv()
-    print(f'Hi,')  # Press ⌘F8 to toggle the breakpoint.
+
+    tabela_tarefas = TabelaTarefas()
+    tarefas_faltantes = tabela_tarefas.pega_tarefas_faltantes()
+    while len(tarefas_faltantes) > 0:
+        morador = fila_geral.pega_proximo_morador_a_pegar_tarefa()
+        tarefa_escolhida = morador.fila_ind.pega_primeira_da_lista_e_poe_no_fim_da_fila(tarefas_faltantes)
+        tabela_tarefas.atribuir_tarefa(tarefa_escolhida, morador)
+
+        tarefas_faltantes = tabela_tarefas.pega_tarefas_faltantes()
+
+    tabela_tarefas.mostra_tabela()
+
+    salva_filas_no_csv(fila_geral)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    gera_tarefas();
+    gera_tarefas()
