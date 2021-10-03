@@ -100,11 +100,17 @@ def salva_filas_no_csv(fila_geral: FilaMoradores):
     """
     Referência: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_csv.html
     """
-    df = pd.DataFrame({'Nome': [morador.nome for morador in fila_geral],
-                       'Tarefa1': [morador.fila_ind[0].name for morador in fila_geral],
-                       'Tarefa2': [morador.fila_ind[1].name for morador in fila_geral],
-                       'Tarefa3': [morador.fila_ind[2].name for morador in fila_geral],
-                       'Tarefa4': [morador.fila_ind[3].name for morador in fila_geral]})
+    n_tipos_de_tarefas = len(Tarefa)
+    dict_info = {'Nome': []}
+    for n in reversed(range(n_tipos_de_tarefas)):
+        dict_info['Tarefa de prioridade ' + str(n)] = []
+
+    for morador in fila_geral:
+        dict_info['Nome'].append(morador.nome)
+        for n in range(n_tipos_de_tarefas):
+            dict_info['Tarefa de prioridade ' + str(n)].append(morador.fila_ind[-(n+1)].name)
+
+    df = pd.DataFrame(dict_info)
     df.to_csv('filas.csv', index=False)
 
 
