@@ -7,7 +7,7 @@ class Tarefa(Enum):
     PANOS = ('Panos', 1)
     LIXO = ('Lixo', 1)
     LOUCA = ('Louça', 2)
-
+    PASSEIO_NESIA = ('Passear com a Nésia', 1)
 
 class Fila:
     def __init__(self, valor_inicial=None):
