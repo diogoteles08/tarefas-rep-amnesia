@@ -48,9 +48,9 @@ class FilaIndividual(Fila):
             valor_inicial = list(Tarefa)
         super().__init__(valor_inicial)
 
-    def pega_primeira_da_lista_e_poe_no_fim_da_fila(self, lista):
+    def pega_proxima_tarefa_entre_tarefas_disponiveis(self, tarefas_disponiveis):
         for i in range(len(Tarefa)):
-            if self.valor[i] in lista:
+            if self.valor[i] in tarefas_disponiveis:
                 indice_tarefa_escolhida = i
                 tarefa_escolhida = self.valor[i]
                 break
@@ -122,7 +122,7 @@ def gera_tarefas():
     tarefas_faltantes = tabela_tarefas.pega_tarefas_faltantes()
     while len(tarefas_faltantes) > 0:
         morador = fila_geral.pega_proximo_morador_a_pegar_tarefa()
-        tarefa_escolhida = morador.fila_ind.pega_primeira_da_lista_e_poe_no_fim_da_fila(tarefas_faltantes)
+        tarefa_escolhida = morador.fila_ind.pega_proxima_tarefa_entre_tarefas_disponiveis(tarefas_faltantes)
         tabela_tarefas.atribuir_tarefa(tarefa_escolhida, morador)
 
         tarefas_faltantes = tabela_tarefas.pega_tarefas_faltantes()
