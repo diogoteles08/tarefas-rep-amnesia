@@ -3,6 +3,12 @@ import pandas as pd
 
 
 class Tarefa(Enum):
+    """
+    Representa uma tarefa a ser desempenhada por moradores da república.
+    Como valor, tem uma tupla com:
+    - Uma string representando o nome completo da tarefa
+    - Um inteiro representando a quantidade de pessoas necessárias para desempenhar a tarefa na semana
+    """
     COCO = ('Cocô', 1)
     PANOS = ('Panos', 1)
     LIXO = ('Lixo', 1)
@@ -10,6 +16,9 @@ class Tarefa(Enum):
     PASSEIO_NESIA = ('Passear com a Nésia', 1)
 
 class Fila:
+    """
+    Um modelo abstrato de fila para ser reutilizado.
+    """
     def __init__(self, valor_inicial=None):
         if valor_inicial is None:
             valor_inicial = []
@@ -29,6 +38,9 @@ class Fila:
 
 
 class FilaMoradores(Fila):
+    """
+    Fila geral de moradores, que será usada para ditar quais moradores deverão pegar tarefas em cada semana.
+    """
     def __init__(self, valor_inicial=None):
         super().__init__(valor_inicial)
 
@@ -43,6 +55,10 @@ class FilaMoradores(Fila):
 
 
 class FilaIndividual(Fila):
+    """
+    Fila individual de tarefas para cada morador. Será usada para dizer qual tarefa um morador deverá pegar, ser ele
+    precisar pegar uma tarefa essa semana.
+    """
     def __init__(self, valor_inicial=None):
         if valor_inicial is None:
             valor_inicial = list(Tarefa)
@@ -69,6 +85,9 @@ class Morador:
 
 
 class TabelaTarefas:
+    """
+    Representa a tabela final que indica quais moradores pegarão quais tarefas.
+    """
     def __init__(self):
         self.tabela = {tarefa: [] for tarefa in Tarefa}
 
@@ -84,6 +103,11 @@ class TabelaTarefas:
 
 
 def extrai_filas_do_csv():
+    """
+    Lê o arquivo CSV e converte para um objeto de FilaMoradores.
+
+    :return: FilaMoradores
+    """
     info_filas = pd.read_csv('filas.csv')
     fila_geral = []
     for info_fila in info_filas.iterrows():
@@ -115,7 +139,6 @@ def salva_filas_no_csv(fila_geral: FilaMoradores):
 
 
 def gera_tarefas():
-    # Use a breakpoint in the code line below to debug your script.
     fila_geral = extrai_filas_do_csv()
 
     tabela_tarefas = TabelaTarefas()
@@ -132,6 +155,5 @@ def gera_tarefas():
     salva_filas_no_csv(fila_geral)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     gera_tarefas()
